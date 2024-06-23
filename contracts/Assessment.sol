@@ -1,60 +1,92 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-//import "hardhat/console.sol";
-
 contract Assessment {
-    address payable public owner;
-    uint256 public balance;
+    address payable public vaultOwner;
+    uint256 public vaultBalance;
 
-    event Deposit(uint256 amount);
-    event Withdraw(uint256 amount);
+    event Deposited(uint256 amount);
+    event Withdrawn(uint256 amount);
 
-    constructor(uint initBalance) payable {
-        owner = payable(msg.sender);
-        balance = initBalance;
+    constructor(uint initialBalance) payable {
+        vaultOwner = payable(msg.sender);
+        vaultBalance = initialBalance;
     }
 
     function getBalance() public view returns(uint256){
-        return balance;
+        return vaultBalance; // Return the vaultBalance here
     }
 
-    function deposit(uint256 _amount) public payable {
-        uint _previousBalance = balance;
+    function deposit(uint256 amount) public payable {
+        uint previousBalance = vaultBalance;
 
         // make sure this is the owner
-        require(msg.sender == owner, "You are not the owner of this account");
+        require(msg.sender == vaultOwner, "You are not the owner of this vault");
 
         // perform transaction
-        balance += _amount;
+        vaultBalance += amount;
 
         // assert transaction completed successfully
-        assert(balance == _previousBalance + _amount);
+        assert(vaultBalance == previousBalance + amount);
 
         // emit the event
-        emit Deposit(_amount);
+        emit Deposited(amount);
     }
 
     // custom error
     error InsufficientBalance(uint256 balance, uint256 withdrawAmount);
 
-    function withdraw(uint256 _withdrawAmount) public {
-        require(msg.sender == owner, "You are not the owner of this account");
-        uint _previousBalance = balance;
-        if (balance < _withdrawAmount) {
+    function withdraw(uint256 amount) public {
+        require(msg.sender == vaultOwner, "You are not the owner of this vault");
+        uint previousBalance = vaultBalance;
+        if (vaultBalance < amount) {
             revert InsufficientBalance({
-                balance: balance,
-                withdrawAmount: _withdrawAmount
+                balance: vaultBalance,
+                withdrawAmount: amount
             });
         }
 
         // withdraw the given amount
-        balance -= _withdrawAmount;
+        vaultBalance -= amount;
 
         // assert the balance is correct
-        assert(balance == (_previousBalance - _withdrawAmount));
+        assert(vaultBalance == (previousBalance - amount));
 
         // emit the event
-        emit Withdraw(_withdrawAmount);
+        emit Withdrawn(amount);
+    }
+
+    function calculateGoldReturns(uint256 investmentAmount, uint256 initialPrice, uint256 investmentYear, uint256 currentYear, uint256 currentPrice) public pure returns (uint256 profit, uint256 annualizedReturn) {
+        uint256 yearsPassed = currentYear - investmentYear;
+        uint256 goldPurchased = investmentAmount / initialPrice;
+        uint256 currentInvestmentValue = goldPurchased * currentPrice;
+        uint256 investmentValueAtStartYear = goldPurchased * initialPrice;
+        profit = currentInvestmentValue - investmentValueAtStartYear;
+        annualizedReturn = profit / yearsPassed;
+    }
+
+    function generateSecurityChallenge() public view returns (string memory) {
+        uint256 firstNumber = uint256(blockhash(block.number - 1)) % 10;
+        uint256 secondNumber = uint256(blockhash(block.number - 2)) % 10;
+        return string(abi.encodePacked("Please solve: ", uintToString(firstNumber), " + ", uintToString(secondNumber)));
+    }
+
+    function uintToString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
     }
 }
