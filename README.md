@@ -1,12 +1,41 @@
-# Starter Next/Hardhat Project
+## Metacrafters ATM & Scholarship Portal - README
 
-After cloning the github, you will want to do the following to get the code running on your computer.
+### Overview
+This is a decentralized application (dApp) built with React and ethers.js, integrating a MetaMask wallet for Ethereum transactions. The dApp allows users to interact with an Ethereum-based ATM contract and check their scholarship eligibility based on CAT scores.
 
-1. Inside the project directory, in the terminal type: npm i
-2. Open two additional terminals in your VS code
-3. In the second terminal type: npx hardhat node
-4. In the third terminal, type: npx hardhat run --network localhost scripts/deploy.js
-5. Back in the first terminal, type npm run dev to launch the front-end
+### Features
+- **MetaMask Integration:** Connect your MetaMask wallet to interact with the application.
+- **ATM Functions:** Deposit and withdraw 1 ETH using the connected Ethereum account.
+- **Scholarship Eligibility:** Enter your CAT score to check eligibility for scholarships and view detailed scholarship information.
 
-After this, the project will be running on your localhost. 
-Typically at http://localhost:3000/
+### Installation
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/your-repo/metacrafters-atm-portal.git
+   ```
+2. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Run the Application:**
+   ```bash
+   npm run dev
+   ```
+
+### Usage
+1. **Connect MetaMask Wallet:**
+   - Click the "Connect MetaMask Wallet" button to link your Ethereum account.
+2. **Deposit/Withdraw ETH:**
+   - Use the provided buttons to deposit or withdraw 1 ETH from the ATM contract.
+3. **Check Scholarship Eligibility:**
+   - Enter your CAT score and click "Check Eligibility" to see your scholarship status.
+   - View the detailed scholarship brochure for more information.
+
+### Technologies Used
+- **React**: For building the user interface.
+- **Ethers.js**: For interacting with the Ethereum blockchain.
+- **MetaMask**: For wallet connection and transaction signing.
+
+### License
+This project is licensed under the MIT License.
+
