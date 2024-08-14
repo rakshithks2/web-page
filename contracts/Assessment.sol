@@ -1,92 +1,93 @@
-// SPDX-License-Identifier: UNLICENSED
+ // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
 contract Assessment {
-    address payable public vaultOwner;
-    uint256 public vaultBalance;
+    address payable public owner;
+    uint256 public balance;
 
-    event Deposited(uint256 amount);
-    event Withdrawn(uint256 amount);
+    event Deposit(uint256 amount);
+    event Withdraw(uint256 amount);
+    event EligibilityChecked(uint256 score, uint256 scholarshipAmount, string message);
 
-    constructor(uint initialBalance) payable {
-        vaultOwner = payable(msg.sender);
-        vaultBalance = initialBalance;
+    constructor(uint initBalance) payable {
+        owner = payable(msg.sender);
+        balance = initBalance;
     }
 
     function getBalance() public view returns(uint256){
-        return vaultBalance; // Return the vaultBalance here
+        return balance;
     }
 
-    function deposit(uint256 amount) public payable {
-        uint previousBalance = vaultBalance;
+    function deposit(uint256 _amount) public payable {
+        uint _previousBalance = balance;
 
         // make sure this is the owner
-        require(msg.sender == vaultOwner, "You are not the owner of this vault");
+        require(msg.sender == owner, "You are not the owner of this account");
 
         // perform transaction
-        vaultBalance += amount;
+        balance += _amount;
 
         // assert transaction completed successfully
-        assert(vaultBalance == previousBalance + amount);
+        assert(balance == _previousBalance + _amount);
 
         // emit the event
-        emit Deposited(amount);
+        emit Deposit(_amount);
     }
 
     // custom error
     error InsufficientBalance(uint256 balance, uint256 withdrawAmount);
 
-    function withdraw(uint256 amount) public {
-        require(msg.sender == vaultOwner, "You are not the owner of this vault");
-        uint previousBalance = vaultBalance;
-        if (vaultBalance < amount) {
+    function withdraw(uint256 _withdrawAmount) public {
+        require(msg.sender == owner, "You are not the owner of this account");
+        uint _previousBalance = balance;
+        if (balance < _withdrawAmount) {
             revert InsufficientBalance({
-                balance: vaultBalance,
-                withdrawAmount: amount
+                balance: balance,
+                withdrawAmount: _withdrawAmount
             });
         }
 
         // withdraw the given amount
-        vaultBalance -= amount;
+        balance -= _withdrawAmount;
 
         // assert the balance is correct
-        assert(vaultBalance == (previousBalance - amount));
+        assert(balance == (_previousBalance - _withdrawAmount));
 
         // emit the event
-        emit Withdrawn(amount);
+        emit Withdraw(_withdrawAmount);
     }
 
-    function calculateGoldReturns(uint256 investmentAmount, uint256 initialPrice, uint256 investmentYear, uint256 currentYear, uint256 currentPrice) public pure returns (uint256 profit, uint256 annualizedReturn) {
-        uint256 yearsPassed = currentYear - investmentYear;
-        uint256 goldPurchased = investmentAmount / initialPrice;
-        uint256 currentInvestmentValue = goldPurchased * currentPrice;
-        uint256 investmentValueAtStartYear = goldPurchased * initialPrice;
-        profit = currentInvestmentValue - investmentValueAtStartYear;
-        annualizedReturn = profit / yearsPassed;
+    function checkEligibility(uint256 score) public  returns (uint256, string memory) {
+        uint256 scholarshipAmount;
+        string memory message;
+
+        if (score > 400) {
+            scholarshipAmount = 10000;
+            message = "Fantastic! You're eligible for a $10,000 scholarship.";
+        } else if (score > 350) {
+            scholarshipAmount = 7000;
+            message = "Great job! You're eligible for a $7,000 scholarship.";
+        } else if (score > 300) {
+            scholarshipAmount = 6000;
+            message = "Well done! You're eligible for a $6,000 scholarship.";
+        } else if (score > 250) {
+            scholarshipAmount = 5000;
+            message = "Good effort! You're eligible for a $5,000 scholarship.";
+        } else {
+            scholarshipAmount = 0;
+            message = "Unfortunately, you're not eligible for a scholarship.";
+        }
+
+        emit EligibilityChecked(score, scholarshipAmount, message);
+
+        return (scholarshipAmount, message);
     }
 
-    function generateSecurityChallenge() public view returns (string memory) {
-        uint256 firstNumber = uint256(blockhash(block.number - 1)) % 10;
-        uint256 secondNumber = uint256(blockhash(block.number - 2)) % 10;
-        return string(abi.encodePacked("Please solve: ", uintToString(firstNumber), " + ", uintToString(secondNumber)));
-    }
-
-    function uintToString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
+    function getScholarshipBrochure() public pure returns (string memory) {
+        return "Scholarship Details:\n"
+               "Score above 400: $10,000 Scholarship\n"
+               "Score above 350: $7,000 Scholarship\n"
+               "Score above 300: $6,000 Scholarship\n"
+               "Score above 250: $5,000 Scholarship\n";
     }
 }
